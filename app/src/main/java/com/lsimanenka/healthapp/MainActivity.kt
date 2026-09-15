@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.lsimanenka.healthapp.navigation.MainScreen
-import com.lsimanenka.healthapp.ui.theme.HealthAppTheme
+import com.lsimanenka.healthapp.core.ui.theme.HealthAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
