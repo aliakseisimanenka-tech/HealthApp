@@ -10,4 +10,7 @@ sealed interface Screen {
     data object History : Screen
     @Serializable
     data object Profile : Screen
+
+    @Serializable
+    data object Workout : Screen
 }

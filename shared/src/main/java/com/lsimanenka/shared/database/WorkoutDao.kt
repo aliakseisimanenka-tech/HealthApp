@@ -3,6 +3,7 @@ package com.lsimanenka.shared.database
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WorkoutDao {
@@ -11,7 +12,7 @@ interface WorkoutDao {
     suspend fun insertWorkout(workout: WorkoutEntity)
 
     @Query("SELECT * FROM workouts_table WHERE date >= :startOfDay AND date <= :endOfDay")
-    suspend fun getWorkoutsForDay(startOfDay: Long, endOfDay: Long): List<WorkoutEntity>
+    fun getWorkoutsForDay(startOfDay: Long, endOfDay: Long): Flow<List<WorkoutEntity>>
 
     @Query("""
         SELECT 
@@ -24,9 +25,9 @@ interface WorkoutDao {
         WHERE date BETWEEN :startTime AND :endTime
         AND (:category IS NULL OR action = :category)
     """)
-    suspend fun getAggregatedStats(
+    fun getAggregatedStats(
         startTime: Long,
         endTime: Long,
         category: String? = null
-    ): AggregatedStats
+    ): Flow<AggregatedStats>
 }

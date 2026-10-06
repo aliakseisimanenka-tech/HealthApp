@@ -9,6 +9,7 @@ import com.lsimanenka.healthapp.core.util.Screen
 import com.lsimanenka.healthapp.features.history.HistoryScreen
 import com.lsimanenka.healthapp.features.home.presentation.HomeScreen
 import com.lsimanenka.healthapp.features.profile.ProfileScreen
+import com.lsimanenka.healthapp.features.workout.presentation.WorkoutScreen
 
 @Composable
 fun AppNavHost(
@@ -20,8 +21,21 @@ fun AppNavHost(
         startDestination = Screen.Home,
         modifier = modifier
     ) {
-        composable<Screen.Home> { HomeScreen() }
-        composable<Screen.History> { HistoryScreen() }
+        composable<Screen.Home> { HomeScreen(
+            onNavigateToAddWorkout = {
+                navController.navigate(Screen.Workout)
+            }
+        ) }
+        composable<Screen.History> { HistoryScreen(
+            onNavigateToAddWorkout = {
+                navController.navigate(Screen.Workout)
+            }
+        ) }
         composable<Screen.Profile> { ProfileScreen() }
+        composable<Screen.Workout> {
+            WorkoutScreen(
+                onClose = { navController.popBackStack() }
+            )
+        }
     }
 }

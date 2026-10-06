@@ -20,7 +20,9 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "health_app_database"
-        ).build()
+        )
+            .addMigrations(WorkoutMigrations.MIGRATION_1_2)
+            .build()
     }
 
     @Provides
