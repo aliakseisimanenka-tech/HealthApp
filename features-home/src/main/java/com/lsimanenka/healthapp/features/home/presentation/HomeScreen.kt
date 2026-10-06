@@ -1,4 +1,4 @@
-package com.lsimanenka.healthapp.features.home
+package com.lsimanenka.healthapp.features.home.presentation
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,9 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.lsimanenka.healthapp.core.ui.theme.FitBlue
+import com.lsimanenka.healthapp.core.ui.theme.FitTeal
+import com.lsimanenka.healthapp.features.home.R
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
@@ -25,9 +29,9 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             FloatingActionButton(
                 onClick = { viewModel.onIntent(HomeContract.Intent.OnAddClick) },
                 containerColor = Color.White,
-                contentColor = Color(0xFF4285F4)
+                contentColor = FitBlue
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.home_fab_add_desc))
             }
         },
     ) { paddingValues ->
@@ -45,16 +49,16 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 MainMetricItem(
-                    label = "Баллы кардио:",
+                    label = stringResource(R.string.home_cardio_points),
                     value = state.cardioPoints.toString(),
                     icon = Icons.Default.FavoriteBorder,
-                    color = Color(0xFF00C4B4)
+                    color = FitTeal
                 )
                 MainMetricItem(
-                    label = "Шаги:",
+                    label = stringResource(R.string.home_steps),
                     value = state.steps.toString(),
                     icon = Icons.Default.DirectionsWalk,
-                    color = Color(0xFF4285F4)
+                    color = FitBlue
                 )
             }
 
@@ -64,9 +68,9 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                SecondaryMetricItem(value = state.calories.toString(), label = "ккал")
-                SecondaryMetricItem(value = state.distanceKm.toString(), label = "км")
-                SecondaryMetricItem(value = state.activeMinutes.toString(), label = "мин. активности")
+                SecondaryMetricItem(value = state.calories.toString(), label = stringResource(R.string.home_kcal))
+                SecondaryMetricItem(value = state.distanceKm.toString(), label = stringResource(R.string.home_km))
+                SecondaryMetricItem(value = state.activeMinutes.toString(), label = stringResource(R.string.home_active_minutes))
             }
         }
     }
@@ -86,7 +90,7 @@ fun MainMetricItem(label: String, value: String, icon: ImageVector, color: Color
 @Composable
 fun SecondaryMetricItem(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = value, style = MaterialTheme.typography.headlineSmall, color = Color(0xFF4285F4))
+        Text(text = value, style = MaterialTheme.typography.headlineSmall, color = FitBlue)
         Text(text = label, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
     }
 }

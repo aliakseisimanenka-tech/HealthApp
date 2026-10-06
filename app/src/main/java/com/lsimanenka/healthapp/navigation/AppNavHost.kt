@@ -7,7 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.lsimanenka.healthapp.core.util.Screen
 import com.lsimanenka.healthapp.features.history.HistoryScreen
-import com.lsimanenka.healthapp.features.home.HomeScreen
+import com.lsimanenka.healthapp.features.home.presentation.HomeScreen
 import com.lsimanenka.healthapp.features.profile.ProfileScreen
 
 @Composable

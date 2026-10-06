@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_fab_add_desc">Добавить тренировку</string>
+
+    <string name="home_cardio_points">Баллы кардио:</string>
+    <string name="home_steps">Шаги:</string>
+    <string name="home_kcal">ккал</string>
+    <string name="home_km">км</string>
+    <string name="home_active_minutes">мин. активности</string>
+</resources>

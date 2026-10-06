@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/features-history" />
             <option value="$PROJECT_DIR$/features-home" />
             <option value="$PROJECT_DIR$/features-profile" />
+            <option value="$PROJECT_DIR$/shared" />
           </set>
         </option>
       </GradleProjectSettings>
