@@ -50,6 +50,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.5")
 
     implementation(libs.hilt.android)
+    implementation(libs.androidx.ui.text)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
