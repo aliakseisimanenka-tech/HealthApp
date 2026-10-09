@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="workout_action_running">Бег</string>
+    <string name="workout_action_swimming">Плавание</string>
+    <string name="workout_action_cycling">Велоспорт</string>
+    <string name="workout_action_football">Футбол</string>
+    <string name="workout_action_basketball">Баскетбол</string>
+    <string name="workout_action_tennis">Теннис</string>
+    <string name="workout_action_crossfit">Кроссфит</string>
+    <string name="workout_action_rowing">Гребля</string>
+    <string name="workout_action_boxing">Бокс</string>
+    <string name="workout_action_climbing">Скалолазание</string>
+</resources>
