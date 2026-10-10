@@ -27,6 +27,10 @@ import com.lsimanenka.healthapp.features.workout.presentation.util.WorkoutAction
 import com.lsimanenka.healthapp.features.workout.presentation.util.WorkoutClickableFieldItem
 import com.lsimanenka.healthapp.features.workout.presentation.util.WorkoutEditableFieldItem
 import kotlinx.coroutines.flow.collectLatest
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,15 +39,27 @@ fun WorkoutScreen(
     onClose: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var showActionDialog by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showDurationPicker by remember { mutableStateOf(false) }
+
+    val formattedDate = remember(state.date) {
+        val instant = Instant.ofEpochMilli(state.date)
+        val localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate()
+        val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault())
+        localDate.format(formatter)
+    }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is AddWorkoutContract.SideEffect.NavigateBack -> onClose()
+                is AddWorkoutContract.SideEffect.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(effect.message)
+                }
             }
         }
     }
@@ -87,7 +103,19 @@ fun WorkoutScreen(
         }
     }
 
+    if (showDurationPicker) {
+        TimePickerDialog(
+            onDismiss = { showDurationPicker = false },
+            onConfirm = { hours, minutes ->
+                val totalMinutes = (hours * 60) + minutes
+                viewModel.onIntent(AddWorkoutContract.Intent.UpdateDuration(totalMinutes))
+                showDurationPicker = false
+            }
+        )
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {},
@@ -128,7 +156,8 @@ fun WorkoutScreen(
 
             WorkoutEditableFieldItem(
                 label = "Название",
-                value = state.name,
+                value = state.name.value,
+                isError = state.name.isError,
                 placeholder = "Добавить",
                 onValueChange = { viewModel.onIntent(AddWorkoutContract.Intent.UpdateName(it)) }
             )
@@ -156,7 +185,7 @@ fun WorkoutScreen(
                 )
                 Row {
                     Text(
-                        text = state.date,
+                        text = formattedDate,
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.clickable { showDatePicker = true }
                     )
@@ -169,40 +198,42 @@ fun WorkoutScreen(
                 }
             }
 
-            WorkoutEditableFieldItem(
+            WorkoutClickableFieldItem(
                 label = "Продолжительность",
-                value = state.durationMin,
-                placeholder = "30",
-                onValueChange = { viewModel.onIntent(AddWorkoutContract.Intent.UpdateDuration(it)) },
-                keyboardType = KeyboardType.Number
+                value = "${state.duration / 60} ч. ${state.duration % 60} мин.",
+                onClick = { showDurationPicker = true }
             )
 
             HorizontalDivider(color = Color.LightGray.copy(alpha = 0.5f))
 
             WorkoutEditableFieldItem(
                 label = "Интенсивность",
-                value = state.cardioPoints,
+                value = state.cardioPoints.value,
+                isError = state.cardioPoints.isError,
                 placeholder = "Добавить параметр \"баллы кардио\"",
                 onValueChange = { viewModel.onIntent(AddWorkoutContract.Intent.UpdateCardio(it)) },
                 keyboardType = KeyboardType.Number
             )
             WorkoutEditableFieldItem(
                 label = "Расстояние",
-                value = state.distance,
+                value = state.distance.value,
+                isError = state.distance.isError,
                 placeholder = "Добавить параметр \"км\"",
                 onValueChange = { viewModel.onIntent(AddWorkoutContract.Intent.UpdateDistance(it)) },
                 keyboardType = KeyboardType.Number
             )
             WorkoutEditableFieldItem(
                 label = "Расход энергии",
-                value = state.calories,
+                value = state.calories.value,
+                isError = state.calories.isError,
                 placeholder = "Добавить параметр \"ккал\"",
                 onValueChange = { viewModel.onIntent(AddWorkoutContract.Intent.UpdateCalories(it)) },
                 keyboardType = KeyboardType.Number
             )
             WorkoutEditableFieldItem(
                 label = "Шаги",
-                value = state.steps,
+                value = state.steps.value,
+                isError = state.steps.isError,
                 placeholder = "Добавить параметр \"шаги\"",
                 onValueChange = { viewModel.onIntent(AddWorkoutContract.Intent.UpdateSteps(it)) },
                 keyboardType = KeyboardType.Number
@@ -233,7 +264,6 @@ fun WorkoutScreen(
         }
     }
 }
-
 
 @Composable
 fun ActionDropdownDialog(

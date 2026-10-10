@@ -1,6 +1,5 @@
 package com.lsimanenka.healthapp.features.workout.presentation
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -31,26 +30,60 @@ class WorkoutViewModel @Inject constructor(
             AddWorkoutContract.Intent.OnCloseClick -> {
                 sendEffect(AddWorkoutContract.SideEffect.NavigateBack)
             }
-            AddWorkoutContract.Intent.OnSaveClick -> { saveWorkout() }
+            AddWorkoutContract.Intent.OnSaveClick -> {
+                saveWorkout()
+            }
             else -> {}
         }
     }
 
     private fun saveWorkout() {
+        val currentState = state.value
+
+        val timeParts = currentState.time.split(":")
+        val hour = timeParts.getOrNull(0)?.toIntOrNull() ?: 0
+        val minute = timeParts.getOrNull(1)?.toIntOrNull() ?: 0
+        val finalTimestamp = currentState.date + (hour * 3600_000L) + (minute * 60_000L)
+
+        val isNameValid = currentState.name.value.isNotBlank()
+
+        val isCardioValid = currentState.cardioPoints.value.isBlank() ||
+                (currentState.cardioPoints.value.toIntOrNull() != null && currentState.cardioPoints.value.toInt() >= 0)
+
+        val isDistanceValid = currentState.distance.value.isBlank() ||
+                (currentState.distance.value.toIntOrNull() != null && currentState.distance.value.toInt() >= 0)
+
+        val isCaloriesValid = currentState.calories.value.isBlank() ||
+                (currentState.calories.value.toIntOrNull() != null && currentState.calories.value.toInt() >= 0)
+
+        val isStepsValid = currentState.steps.value.isBlank() ||
+                (currentState.steps.value.toIntOrNull() != null && currentState.steps.value.toInt() >= 0)
+
+        val hasError = !isNameValid || !isCardioValid || !isDistanceValid || !isCaloriesValid || !isStepsValid
+
+        if (hasError) {
+            handle[KEY_STATE] = currentState.copy(
+                name = currentState.name.copy(isError = !isNameValid),
+                cardioPoints = currentState.cardioPoints.copy(isError = !isCardioValid),
+                distance = currentState.distance.copy(isError = !isDistanceValid),
+                calories = currentState.calories.copy(isError = !isCaloriesValid),
+                steps = currentState.steps.copy(isError = !isStepsValid)
+            )
+
+            sendEffect(AddWorkoutContract.SideEffect.ShowSnackbar("Пожалуйста, корректно заполните выделенные поля"))
+            return
+        }
+
         viewModelScope.launch {
-            val currentState = state.value
-
-            Log.d("WORKOUT", "${currentState.name}, ${currentState.cardioPoints}, ${currentState.steps}")
-
             val workout = Workout(
-                name = currentState.name.ifEmpty { "Тренировка" },
+                name = currentState.name.value,
                 action = currentState.actionType,
-                date = System.currentTimeMillis(),
-                duration = currentState.durationMin.toIntOrNull() ?: 30,
-                cardio = currentState.cardioPoints.toIntOrNull() ?: 10,
-                distance = currentState.distance.toIntOrNull() ?: 10,
-                kcal = currentState.calories.toIntOrNull() ?: 10,
-                steps = currentState.steps.toIntOrNull() ?: 10,
+                date = finalTimestamp,
+                duration = currentState.duration,
+                cardio = currentState.cardioPoints.value.toIntOrNull() ?: 0,
+                distance = currentState.distance.value.toIntOrNull() ?: 0,
+                kcal = currentState.calories.value.toIntOrNull() ?: 0,
+                steps = currentState.steps.value.toIntOrNull() ?: 0,
                 notes = currentState.notes
             )
 

@@ -14,15 +14,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun WorkoutEditableFieldItem(
     label: String,
     value: String,
     placeholder: String,
     onValueChange: (String) -> Unit,
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    isError: Boolean = false
 ) {
+    val textColor = if (isError) Color.Red else Color.Black
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -33,7 +35,7 @@ fun WorkoutEditableFieldItem(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.Black,
+            color = textColor,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
@@ -42,7 +44,7 @@ fun WorkoutEditableFieldItem(
             value = value,
             onValueChange = onValueChange,
             textStyle = MaterialTheme.typography.bodyLarge.copy(
-                color = Color.Black,
+                color = textColor,
                 textAlign = TextAlign.End
             ),
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
@@ -56,7 +58,7 @@ fun WorkoutEditableFieldItem(
                         Text(
                             text = placeholder,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Gray,
+                            color = if (isError) Color.Red.copy(alpha = 0.5f) else Color.Gray,
                             textAlign = TextAlign.End
                         )
                     }
@@ -66,4 +68,3 @@ fun WorkoutEditableFieldItem(
         )
     }
 }
-
