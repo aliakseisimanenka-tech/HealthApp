@@ -20,7 +20,7 @@ class HomeRepositoryImpl @Inject constructor(
         val startOfDay = today.atStartOfDay(zone).toInstant().toEpochMilli()
         val endOfDay = today.atTime(LocalTime.MAX).atZone(zone).toInstant().toEpochMilli()
 
-        return sharedStatsProvider.getStats(startOfDay, endOfDay)
+        return sharedStatsProvider.getAggregatedStatsFlow(startOfDay, endOfDay)
             .map { stats ->
                 DailyMetrics(
                     cardioPoints = stats.totalCardio,

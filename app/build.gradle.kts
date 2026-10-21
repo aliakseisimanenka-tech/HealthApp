@@ -49,10 +49,8 @@ dependencies {
     implementation(project(":features:history"))
     implementation(project(":features:profile"))
     implementation(project(":features:workout"))
-
-
-    implementation(project(":core"))
-    implementation(project(":shared"))
+    implementation(project(":features:auth"))
+    implementation(project(":core:util"))
 
 
     implementation("androidx.navigation:navigation-compose:2.8.7")
@@ -65,8 +63,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.5")
-
-    implementation("androidx.navigation:navigation-compose:2.8.7")
 
     implementation(libs.hilt.android)
     implementation(libs.material3)

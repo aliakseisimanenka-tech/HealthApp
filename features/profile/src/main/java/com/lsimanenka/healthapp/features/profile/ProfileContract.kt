@@ -15,7 +15,8 @@ interface ProfileContract {
         val gender: String = "Мужской",
         val birthDate: String = "11 окт. 1990 г.",
         val weight: String = "",
-        val height: String = ""
+        val height: String = "",
+        val userEmail: String? = null
     ) : Parcelable
 
     sealed class Intent {
@@ -24,6 +25,13 @@ interface ProfileContract {
         data class UpdateStepsGoal(val steps: Int) : Intent()
         data class UpdateCardioGoal(val points: Int) : Intent()
         data class ToggleSleepSchedule(val enabled: Boolean) : Intent()
+        object OnAuthClick : Intent()
+        object OnLogoutClick : Intent()
+    }
+
+    sealed interface SideEffect {
+        object NavigateToAuth : SideEffect
+        data class ShowSnackbar(val message: String) : SideEffect
     }
 
     object Reducer {
@@ -34,6 +42,8 @@ interface ProfileContract {
                 is Intent.UpdateStepsGoal -> state.copy(stepsGoal = intent.steps)
                 is Intent.UpdateCardioGoal -> state.copy(cardioGoal = intent.points)
                 is Intent.ToggleSleepSchedule -> state.copy(sleepScheduleEnabled = intent.enabled)
+                Intent.OnAuthClick -> state
+                Intent.OnLogoutClick -> state.copy(userEmail = null)
             }
         }
     }
