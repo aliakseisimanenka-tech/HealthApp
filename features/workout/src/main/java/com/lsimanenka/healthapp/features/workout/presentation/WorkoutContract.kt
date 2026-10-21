@@ -18,7 +18,25 @@ interface AddWorkoutContract {
         val calories: FieldState = FieldState(""),
         val steps: FieldState = FieldState(""),
         val notes: String = ""
-    ) : Parcelable
+    ) : Parcelable {
+        fun validate(): State {
+            val isNameValid = name.value.isNotBlank()
+
+            fun checkNum(valStr: String) =
+                valStr.isBlank() || (valStr.toIntOrNull() != null && valStr.toInt() >= 0)
+
+            return this.copy(
+                name = name.copy(isError = !isNameValid),
+                cardioPoints = cardioPoints.copy(isError = !checkNum(cardioPoints.value)),
+                distance = distance.copy(isError = !checkNum(distance.value)),
+                calories = calories.copy(isError = !checkNum(calories.value)),
+                steps = steps.copy(isError = !checkNum(steps.value))
+            )
+        }
+
+        val hasError: Boolean
+            get() = name.isError || cardioPoints.isError || distance.isError || calories.isError || steps.isError
+    }
 
     sealed class Intent {
         object OnCloseClick : Intent()
@@ -49,9 +67,27 @@ interface AddWorkoutContract {
 
                 is Intent.UpdateName -> state.copy(name = FieldState(intent.name, false))
                 is Intent.UpdateDuration -> state.copy(duration = intent.minutes)
-                is Intent.UpdateCardio -> state.copy(cardioPoints = FieldState(intent.cardio, false))
-                is Intent.UpdateDistance -> state.copy(distance = FieldState(intent.distance, false))
-                is Intent.UpdateCalories -> state.copy(calories = FieldState(intent.calories, false))
+                is Intent.UpdateCardio -> state.copy(
+                    cardioPoints = FieldState(
+                        intent.cardio,
+                        false
+                    )
+                )
+
+                is Intent.UpdateDistance -> state.copy(
+                    distance = FieldState(
+                        intent.distance,
+                        false
+                    )
+                )
+
+                is Intent.UpdateCalories -> state.copy(
+                    calories = FieldState(
+                        intent.calories,
+                        false
+                    )
+                )
+
                 is Intent.UpdateSteps -> state.copy(steps = FieldState(intent.steps, false))
 
                 is Intent.UpdateActionType -> state.copy(actionType = intent.type)

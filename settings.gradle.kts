@@ -21,9 +21,12 @@ dependencyResolutionManagement {
 
 rootProject.name = "HealthApp"
 include(":app")
+include(":core:util")
 include(":features:home")
 include(":features:history")
 include(":features:profile")
-include(":core")
-include(":shared")
 include(":features:workout")
+include(":features:auth")
+include(":core:database")
+include(":core:remote")
+include(":core:datastore")

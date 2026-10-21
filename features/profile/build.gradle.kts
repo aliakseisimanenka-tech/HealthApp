@@ -41,7 +41,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":core:util"))
+    implementation(project(":features:auth"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)

@@ -39,7 +39,9 @@ android {
 
 dependencies {
 
-    implementation(project(":shared"))
+    implementation(project(":features:auth"))
+    implementation(project(":core:database"))
+    implementation(project(":core:remote"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)

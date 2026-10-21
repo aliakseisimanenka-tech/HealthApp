@@ -7,8 +7,17 @@ import com.lsimanenka.healthapp.features.workout.domain.Workout
 import com.lsimanenka.healthapp.features.workout.domain.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 import javax.inject.Inject
 
 @HiltViewModel
@@ -16,60 +25,49 @@ class WorkoutViewModel @Inject constructor(
     private val handle: SavedStateHandle,
     private val repository: WorkoutRepository
 ) : ViewModel() {
-
-    val state = handle.getStateFlow(KEY_STATE, AddWorkoutContract.State())
+    private val _uiState = MutableStateFlow(
+        handle.get<AddWorkoutContract.State>(KEY_STATE) ?: AddWorkoutContract.State()
+    )
+    val state: StateFlow<AddWorkoutContract.State> = _uiState.asStateFlow()
 
     private val _effect = Channel<AddWorkoutContract.SideEffect>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
     fun onIntent(intent: AddWorkoutContract.Intent) {
-        val newState = AddWorkoutContract.Reducer.reduce(state.value, intent)
-        handle[KEY_STATE] = newState
+        updateState { currentState ->
+            AddWorkoutContract.Reducer.reduce(currentState, intent)
+        }
 
         when (intent) {
             AddWorkoutContract.Intent.OnCloseClick -> {
                 sendEffect(AddWorkoutContract.SideEffect.NavigateBack)
             }
             AddWorkoutContract.Intent.OnSaveClick -> {
-                saveWorkout()
+                validateAndSaveWorkout()
             }
             else -> {}
         }
     }
 
-    private fun saveWorkout() {
+    private fun validateAndSaveWorkout() {
         val currentState = state.value
 
         val timeParts = currentState.time.split(":")
         val hour = timeParts.getOrNull(0)?.toIntOrNull() ?: 0
         val minute = timeParts.getOrNull(1)?.toIntOrNull() ?: 0
-        val finalTimestamp = currentState.date + (hour * 3600_000L) + (minute * 60_000L)
 
-        val isNameValid = currentState.name.value.isNotBlank()
+        val localDate = Instant.ofEpochMilli(currentState.date).atZone(ZoneOffset.UTC).toLocalDate()
+        val localTime = LocalTime.of(hour, minute)
 
-        val isCardioValid = currentState.cardioPoints.value.isBlank() ||
-                (currentState.cardioPoints.value.toIntOrNull() != null && currentState.cardioPoints.value.toInt() >= 0)
+        val finalTimestamp = LocalDateTime.of(localDate, localTime)
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
 
-        val isDistanceValid = currentState.distance.value.isBlank() ||
-                (currentState.distance.value.toIntOrNull() != null && currentState.distance.value.toInt() >= 0)
+        val validatedState = state.value.validate()
+        updateState { validatedState }
 
-        val isCaloriesValid = currentState.calories.value.isBlank() ||
-                (currentState.calories.value.toIntOrNull() != null && currentState.calories.value.toInt() >= 0)
-
-        val isStepsValid = currentState.steps.value.isBlank() ||
-                (currentState.steps.value.toIntOrNull() != null && currentState.steps.value.toInt() >= 0)
-
-        val hasError = !isNameValid || !isCardioValid || !isDistanceValid || !isCaloriesValid || !isStepsValid
-
-        if (hasError) {
-            handle[KEY_STATE] = currentState.copy(
-                name = currentState.name.copy(isError = !isNameValid),
-                cardioPoints = currentState.cardioPoints.copy(isError = !isCardioValid),
-                distance = currentState.distance.copy(isError = !isDistanceValid),
-                calories = currentState.calories.copy(isError = !isCaloriesValid),
-                steps = currentState.steps.copy(isError = !isStepsValid)
-            )
-
+        if (validatedState.hasError) {
             sendEffect(AddWorkoutContract.SideEffect.ShowSnackbar("Пожалуйста, корректно заполните выделенные поля"))
             return
         }
@@ -81,7 +79,7 @@ class WorkoutViewModel @Inject constructor(
                 date = finalTimestamp,
                 duration = currentState.duration,
                 cardio = currentState.cardioPoints.value.toIntOrNull() ?: 0,
-                distance = currentState.distance.value.toIntOrNull() ?: 0,
+                distance = (currentState.distance.value.toIntOrNull()?.times(1000)) ?: 0,
                 kcal = currentState.calories.value.toIntOrNull() ?: 0,
                 steps = currentState.steps.value.toIntOrNull() ?: 0,
                 notes = currentState.notes
@@ -89,6 +87,14 @@ class WorkoutViewModel @Inject constructor(
 
             repository.saveWorkout(workout)
             sendEffect(AddWorkoutContract.SideEffect.NavigateBack)
+        }
+    }
+
+    private fun updateState(update: (AddWorkoutContract.State) -> AddWorkoutContract.State) {
+        _uiState.update { current ->
+            val updated = update(current)
+            handle[KEY_STATE] = updated
+            updated
         }
     }
 

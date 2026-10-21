@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.lsimanenka.auth.presentation.AuthScreen
 import com.lsimanenka.healthapp.core.util.Screen
 import com.lsimanenka.healthapp.features.history.HistoryScreen
 import com.lsimanenka.healthapp.features.home.presentation.HomeScreen
@@ -31,9 +32,18 @@ fun AppNavHost(
                 navController.navigate(Screen.Workout)
             }
         ) }
-        composable<Screen.Profile> { ProfileScreen() }
+        composable<Screen.Profile> { ProfileScreen(
+            onNavigateToAuth = {
+                navController.navigate(Screen.Auth)
+            }
+        ) }
         composable<Screen.Workout> {
             WorkoutScreen(
+                onClose = { navController.popBackStack() }
+            )
+        }
+        composable<Screen.Auth> {
+            AuthScreen(
                 onClose = { navController.popBackStack() }
             )
         }
